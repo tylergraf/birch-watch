@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <title>birch-watch demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <title>birch-watch Demo</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+
+    <link rel="import" href="../birch-watch.html">
+
+    <style is="custom-style" include="demo-pages-shared-styles">  </style>
+
+  </head>
+  <body>
+
+    <div class="vertical-section-container centered">
+      <h3>Basic birch-watch Demo</h3>
+      <demo-snippet>
+        <template>
+          <birch-watch pid="KWC6-QG9" classic-reference-id="_p_fs-ft_ftint" watching=""></birch-watch>
+          <script>
+            // get the current user id
+            document.getElementsByTagName('birch-watch')[0].setAttribute('watcher-cis-id', "cis.user.MMMM-MD6T");
+          </script>
+        </template>
+      </demo-snippet>
+    </div>
+
+  </body>
+</html>

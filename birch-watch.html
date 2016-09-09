@@ -1,0 +1,347 @@
+<!--
+`birch-watch`
+Display and or Update a FamilySearch Person&#39;s Watch status
+
+@demo demo/index.html
+
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../wc-i18n/wc-i18n-src.html">
+<link rel="import" href="../wc-i18n/wc-i18n.html">
+<link rel="import" href="../oak-i18n-behavior/oak-i18n-behavior.html">
+<link rel="import" href="../wc-i18n/wc-i18n-behavior.html">
+
+
+<dom-module id="birch-watch">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+      .watch {
+        color: #333331;
+        display: inline-block;
+        line-height: 22px;
+        padding-left: 20px;
+        position: relative;
+        text-decoration: none;
+        background: #ffffff;
+        border: none;
+        font-size: inherit;
+      }
+
+      .watch:hover {
+        text-decoration: underline;
+      }
+
+      .fs-icon-before-watch-unavailable:before {
+        background: url(data:image/svg+xml;charset=utf-8,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%3Csvg%20version%3D%221.2%22%20baseProfile%3D%22tiny%22%20id%3D%22Art%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20x%3D%220px%22%20y%3D%220px%22%20width%3D%2216px%22%20height%3D%2215px%22%20viewBox%3D%220%200%2016%2015%22%3E%3Cpath%20fill%3D%22%23808080%22%20d%3D%22M12.587%2C14.566c-0.075%2C0-0.169-0.032-0.271-0.094l-3.529-2.117C8.576%2C12.229%2C8.297%2C12.159%2C8%2C12.159s-0.576%2C0.069-0.787%2C0.196l-3.529%2C2.117c-0.102%2C0.062-0.195%2C0.094-0.271%2C0.094c-0.056%2C0-0.098-0.018-0.128-0.054c-0.056-0.064-0.071-0.187-0.046-0.342l0.719-4.309C4.04%2C9.365%2C3.799%2C8.691%2C3.42%2C8.36L0.711%2C5.989C0.575%2C5.871%2C0.509%2C5.751%2C0.535%2C5.671c0.026-0.081%2C0.148-0.139%2C0.328-0.157l3.294-0.329c0.497-0.05%2C1.113-0.438%2C1.373-0.866L7.64%2C0.856C7.74%2C0.692%2C7.867%2C0.602%2C8%2C0.602s0.26%2C0.09%2C0.36%2C0.254L10.47%2C4.32c0.26%2C0.427%2C0.876%2C0.815%2C1.373%2C0.865l3.295%2C0.329c0.179%2C0.018%2C0.302%2C0.077%2C0.327%2C0.157c0.025%2C0.081-0.04%2C0.2-0.176%2C0.318L12.58%2C8.36c-0.379%2C0.331-0.62%2C1.005-0.538%2C1.502l0.719%2C4.309c0.025%2C0.155%2C0.01%2C0.277-0.046%2C0.342C12.685%2C14.549%2C12.643%2C14.566%2C12.587%2C14.566z%22/%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M8.593%2C7.258C8.542%2C7.667%2C8.275%2C8.002%2C8%2C8.002S7.458%2C7.667%2C7.407%2C7.258L7.093%2C4.744C7.042%2C4.335%2C7.225%2C3.775%2C7.5%2C3.5s0.725-0.275%2C1%2C0s0.458%2C0.835%2C0.407%2C1.244L8.593%2C7.258z%22/%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M8%2C11.001c-0.268%2C0-0.519-0.104-0.707-0.292c-0.39-0.39-0.39-1.024%2C0-1.414C7.481%2C9.106%2C7.732%2C9.002%2C8%2C9.002s0.519%2C0.104%2C0.707%2C0.292c0.39%2C0.39%2C0.39%2C1.024%2C0%2C1.414C8.519%2C10.897%2C8.268%2C11.001%2C8%2C11.001z%22/%3E%3C/svg%3E) no-repeat;
+      }
+
+      .fs-icon-before-watch-off:before {
+        background: url(data:image/svg+xml;charset=utf-8,%3Csvg%20version%3D%221.2%22%20baseProfile%3D%22tiny%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2215%22%20viewBox%3D%220%200%2016%2015%22%3E%3Cpath%20fill%3D%22%23333331%22%20d%3D%22M8.001%201.419l1.956%203.212c.357.587%201.143%201.082%201.826%201.151l2.54.255-2.138%201.871c-.535.467-.852%201.349-.735%202.052l.608%203.657-2.962-1.777c-.302-.181-.692-.281-1.096-.281s-.794.1-1.096.282l-2.965%201.776.611-3.657c.116-.702-.2-1.584-.734-2.051L1.678%206.036l2.539-.253c.685-.069%201.47-.563%201.826-1.151l1.958-3.213M8%20.602c-.133%200-.26.09-.36.254L5.53%204.319c-.26.428-.876.816-1.373.866l-3.294.329c-.179.018-.302.077-.328.157-.026.08.04.199.176.318L3.42%208.36c.379.331.62%201.004.538%201.502l-.719%204.309c-.025.155-.01.277.046.342.03.036.072.054.128.054a.553.553%200%200%200%20.271-.094l3.529-2.117c.211-.127.49-.196.787-.196s.576.069.787.196l3.529%202.117a.55.55%200%200%200%20.271.094.156.156%200%200%200%20.128-.054c.056-.064.071-.187.046-.342l-.719-4.309c-.082-.497.159-1.171.538-1.502l2.709-2.371c.136-.119.201-.238.176-.318-.025-.08-.148-.139-.327-.157l-3.295-.329c-.497-.05-1.113-.438-1.373-.865L8.36.855C8.26.692%208.133.602%208%20.602z%22/%3E%3C/svg%3E) no-repeat;
+      }
+
+      .fs-icon-before-watch-on:before {
+        background: url(data:image/svg+xml;charset=utf-8,%3Csvg%20version%3D%221.2%22%20baseProfile%3D%22tiny%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2216%22%20height%3D%2215%22%20viewBox%3D%220%200%2016%2015%22%3E%3Cpath%20fill%3D%22%23333331%22%20d%3D%22M12.587%2014.566a.553.553%200%200%201-.271-.094l-3.529-2.117c-.211-.126-.49-.196-.787-.196s-.576.069-.787.196l-3.529%202.117a.55.55%200%200%201-.271.094.156.156%200%200%201-.128-.054c-.056-.064-.071-.187-.046-.342l.719-4.309c.082-.496-.159-1.17-.538-1.501L.711%205.989c-.136-.118-.202-.238-.176-.318.026-.081.148-.139.328-.157l3.294-.329c.497-.05%201.113-.438%201.373-.866L7.64.856c.1-.164.227-.254.36-.254s.26.09.36.254l2.11%203.464c.26.427.876.815%201.373.865l3.295.329c.179.018.302.077.327.157.025.081-.04.2-.176.318L12.58%208.36c-.379.331-.62%201.005-.538%201.502l.719%204.309c.025.155.01.277-.046.342-.03.036-.072.053-.128.053z%22/%3E%3C/svg%3E) no-repeat;
+      }
+
+      @-moz-keyframes spin {
+        0% { -moz-transform: rotate(0deg); }
+        100% { -moz-transform: rotate(360deg); }
+      }
+      @-webkit-keyframes spin {
+        0% { -webkit-transform: rotate(0deg); }
+        100% { -webkit-transform: rotate(360deg); }
+      }
+      @keyframes spin {
+        0% {transform:rotate(0deg);}
+        100% {transform:rotate(360deg);}
+      }
+
+      .loading.fs-icon-before-watch-on:before,
+      .loading.fs-icon-before-watch-off:before {
+        animation: spin 2s infinite linear;
+      }
+
+
+      .fs-icon-before-watch-loading:before,
+      .fs-icon-before-watch-unavailable:before,
+      .fs-icon-before-watch-off:before,
+      .fs-icon-before-watch-on:before {
+        background-size: 100%;
+        content: "";
+        display: block;
+        height: 15px;
+        left: 0;
+        position: absolute;
+        top: calc(50% - 9px);
+        width: 16px;
+        margin-right: 6px;
+        margin-bottom: 3px;
+        vertical-align: middle;
+      }
+    </style>
+    <wc-i18n-src locale-dir="[[localeDir()]]" locale="en" domain="birch-watch"></wc-i18n-src>
+    <wc-i18n provider key="birch-watch.UNWATCH_LABEL" value="{{_i18n.unWatchLabel}}"></wc-i18n>
+    <wc-i18n provider key="birch-watch.WATCH_LABEL" value="{{_i18n.watchLabel}}"></wc-i18n>
+    <wc-i18n provider key="birch-watch.UNWATCH_TITLE" value="{{_i18n.unWatchTitle}}"></wc-i18n>
+    <wc-i18n provider key="birch-watch.WATCH_TITLE" value="{{_i18n.watchTitle}}"></wc-i18n>
+    <wc-i18n provider key="birch-watch.UNAVAILABLE_TITLE" value="{{_i18n.unavailableTitle}}"></wc-i18n>
+    <wc-i18n provider key="birch-watch.LOADING_LABEL" value="{{_i18n.loadingLabel}}"></wc-i18n>
+
+    <div class="fsWatch">
+      <button on-tap="toggleWatch" class$="watch [[_watchStatus]]" title$="[[_watchTitle]]" role="button" aria-label$=[[_watchLabel]]>[[_watchLabel]]</button>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'birch-watch',
+
+      behaviors: [
+        WCI18nBehavior,
+        OakI18nBehavior
+      ],
+
+      properties: {
+
+        _i18n: {
+          type: Object,
+          value: function() { return {}; }
+        },
+        /** PID for the person being watched */
+        pid: String,
+
+        /** CIS ID for the person doing the watching */
+        watcherCisId: String,
+
+        /** ID for the reference we are on */
+        classicReferenceId: String,
+
+        /** Whether the pid is being watched */
+        _watching: Boolean,
+
+        /** Label for the current watch status */
+        _watchLabel: {
+          type: String,
+          value:""
+        },
+
+        /** Class for the current watch status */
+        _watchStatus: String,
+
+        /** Hover text for the current watch status */
+        _watchTitle: String,
+
+        /** the different classes that _watchStatus can equal */
+        _classes: {
+          type: Object,
+          value: function () {
+            return {
+              watching: 'fs-icon-before-watch-on',
+              notWatching: 'fs-icon-before-watch-off',
+              unavailable: 'fs-icon-before-watch-unavailable'
+            };
+          }
+        }
+      },
+
+      observers: [
+        'getWatchStatus(pid, classicReferenceId, watcherCisId, _i18n.*)'
+      ],
+
+      /**
+       * Gets the current watch status
+       *
+       * @param {String} pid The PID of the person to watch
+       * @param {String} classicReferenceId The id of the current reference (int, beta, prod, etc.)
+       * @param {String} watcherCisId The CIS ID of the person who is watching
+       * @param _i18n {Object} translated strings from locales folder
+       */
+      getWatchStatus: function(pid, classicReferenceId, watcherCisId, _i18n) {
+        var resourceId = pid + classicReferenceId;
+        var watchStatusUrl = '/watch/watches' + '?resourceId=' + resourceId + '&watcher=' + watcherCisId;
+        var watchStatusConfig = {
+          method: 'HEAD'
+        };
+
+        if (this._translationsAreLoaded())
+        {
+          console.log("trans loaded !!!");
+          this._initViewVariables();
+          if (pid && classicReferenceId && watcherCisId) {
+            this._setLoadingViewVariables(true);
+            this._fetchUrl(watchStatusUrl, watchStatusConfig)
+                .then(this._verifyWatchRead.bind(this))
+                .then(this._updateViewVariables.bind(this))
+                .catch(this._updateViewVariables.bind(this));
+          }
+        }
+      },
+
+      /**
+       * Toggles the watch status
+       *
+       * @param {Event} e The event that triggered the function
+       */
+      toggleWatch: function(e) {
+        e.preventDefault();
+        if(this.pid && this.classicReferenceId && this.watcherCisId){
+          this._setLoadingViewVariables(false, this._watching);
+          this._callWatchEndpoints(this._watching, this.pid, this.classicReferenceId, this.watcherCisId)
+              .then(this._updateViewVariables.bind(this))
+              .catch(this._updateViewVariables.bind(this));
+        } else {
+          this._updateViewVariables();
+        }
+      },
+
+      _setLoadingViewVariables: function(initialLoad, watching) {
+        this._watchStatus += ' loading';
+        if(initialLoad) {
+          this._watchLabel = this._i18n.loadingLabel;
+          this._watchTitle = this._i18n.loadingLabel;
+        } else if(watching) {
+          this._watchLabel = this._i18n.unWatchLabel;
+          this._watchTitle = this._i18n.unWatchTitle;
+        } else {
+          this._watchLabel = this._i18n.watchLabel;
+          this._watchTitle = this._i18n.watchTitle;
+        }
+      },
+
+      _translationsAreLoaded: function () {
+        return !!(this._i18n && this._i18n.loadingLabel)
+      },
+
+      /**
+       * Sets the view variables based on if we are watching
+       */
+      _initViewVariables: function () {
+        this._watching = undefined;
+        this._watchLabel = this._i18n.watchLabel;
+        this._watchStatus = this._classes.unavailable;
+        this._watchTitle = this._i18n.unavailableTitle;
+      },
+
+      _updateViewVariables: function (watching) {
+        if (watching === true) {
+          this._watching = true;
+          this._watchLabel = this._i18n.unWatchLabel;
+          this._watchStatus = this._classes.watching;
+          this._watchTitle = this._i18n.unWatchTitle;
+        } else if (watching === false) {
+          this._watching = false;
+          this._watchLabel = this._i18n.watchLabel;
+          this._watchStatus = this._classes.notWatching;
+          this._watchTitle = this._i18n.watchTitle;
+        } else {
+          this._watchStatus = this._classes.unavailable;
+          this._watchTitle = this._i18n.unavailableTitle;
+        }
+      },
+
+      /**
+       * Calls the correct endpoint to toggle the watch
+       *
+       * @param {Boolean} watching Whether the person is being watched or not
+       * @param {String} pid The PID of the person to watch
+       * @param {String} classicReferenceId The id of the current reference (int, beta, prod, etc.)
+       * @param {String} watcherCisId The CIS ID of the person who is watching
+       */
+      _callWatchEndpoints: function (watching, pid, classicReferenceId, watcherCisId) {
+        var WATCH_ENDPOINT = "/watch/watch";
+        var WATCH_STATUS_ENDPOINT = "/watch/watches";
+        var resourceId = pid + classicReferenceId;
+        var url;
+        var config = {};
+        var verifyFunction;
+
+        if (watching !== true) {
+          url = WATCH_ENDPOINT;
+          verifyFunction = this._verifyWatchCreated;
+          config = {
+            method: 'POST',
+            headers: new Headers({'content-type': 'application/json'}),
+            body: JSON.stringify({
+              "interestLevel": "M",
+              "resourceId": resourceId,
+              "title": "Person Watch",
+              "watcherType": "U"
+            })
+          };
+        } else {
+          var queryString = '?resourceId=' + resourceId + '&watcher=' + watcherCisId;
+          url = WATCH_STATUS_ENDPOINT + queryString;
+          verifyFunction = this._verifyWatchDeleted;
+          config = {
+            method: 'DELETE'
+          };
+        }
+        return this._fetchUrl(url, config).then(verifyFunction);
+      },
+
+      /**
+       * Determines whether we are watching or not after reading
+       *
+       * @param {Object} response The response object that we get back from a call
+       */
+      _verifyWatchRead: function(response) {
+        if (response.status === 200) {
+          // Watching Succeeded: 200
+          return true;
+        } else if (response.status === 204) {
+          // Not watching: 204 (also returned when requested for a living individual, or a non-existant ID)
+          return false;
+        }
+      },
+
+      /**
+       * Determines whether we are watching or not after deleting
+       *
+       * @param {Object} response The response object that we get back from a call
+       */
+      _verifyWatchDeleted: function(response) {
+        if (response.status === 200) {
+          // Successfully removed the Watch
+          return false;
+        } else if (response.status === 204) {
+          // Watch did not exist (or it was already deleted)
+          return false;
+        }
+      },
+
+      /**
+       * Determines whether we are watching or not after creating
+       *
+       * @param {Object} res The response object that we get back from a call
+       */
+      _verifyWatchCreated: function(res) {
+        if (res.status === 201) {
+          // Watch created: 201 (will return 201 even if watch already exists)
+          return true;
+        }
+      },
+
+      /**
+       * Sends requests
+       *
+       * @param {String} url The url to request
+       * @param {Object} config The config to request
+       * @return {Promise} The promise will fulfill with a response or reject with an error
+       */
+      _fetchUrl: function(url, config) {
+        // TODO: urls currently depend on being proxied or on a familysearch domain
+        config = config || {};
+        config.credentials = 'same-origin';
+        return fetch(url, config);
+      }
+
+
+    });
+  </script>
+</dom-module>

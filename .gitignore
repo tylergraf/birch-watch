@@ -29,9 +29,23 @@ build/Release
 # Dependency directories
 node_modules
 jspm_packages
+bower_components
 
 # Optional npm cache directory
 .npm
 
 # Optional REPL history
 .node_repl_history
+
+target
+.DS_Store
+.s3creds
+.monitor
+*.esproj
+.idea
+*.iml
+*.ipr
+*.iws
+npm-debug.log
+.env
+.vscode

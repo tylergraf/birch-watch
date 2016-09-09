@@ -1,0 +1,112 @@
+<!doctype html>
+
+<html>
+  <head>
+    <title>birch-watch test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../../fetch/fetch.js"></script>
+
+    <link rel="import" href="../birch-watch.html">
+  </head>
+  <body>
+
+  <test-fixture id="fs-watch-fixture">
+    <template>
+      <birch-watch></birch-watch>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('<fs-watch>', function() {
+
+      var myEl;
+
+      setup(function() {
+        myEl = fixture('fs-watch-fixture');
+      });
+
+      test('Label, status, title should get set to unavailable if we do not have all required properties', function (done) {
+        debugger;
+        flush(function () {
+          myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
+          myEl.classicReferenceId = "REFERENCE_ID";
+          myEl.watcherCisId = null;
+
+          flush(function () {
+            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
+            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
+            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
+
+            myEl.pid = "";
+            myEl.watcherCisId = "WATCHER";
+            myEl.classicReferenceId = "REFERENCE";
+            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
+            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
+            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
+
+            myEl.watcherCisId = "";
+            myEl.pid = "PID";
+            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
+            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
+            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
+
+            myEl.classicReferenceId = "";
+            myEl.watcherCisId = "WATCHER";
+            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
+            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
+            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
+            done();
+          });
+        });
+
+      });
+
+      test('getWatchStatus', function(done) {
+        myEl._fetchUrl = function(watchStatusUrl) {
+          expect(watchStatusUrl).to.contain(myEl.pid);
+          expect(watchStatusUrl).to.contain(myEl.classicReferenceId);
+          expect(watchStatusUrl).to.contain(myEl.watcherCisId);
+          done();
+          return Promise.resolve();
+        };
+
+        myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
+        myEl.classicReferenceId = "REFERENCE_ID";
+        myEl.watcherCisId = "CIS_ID";
+      });
+
+      test('toggleWatch', function() {
+        myEl._fetchUrl = function() {return Promise.resolve({status: 200})};
+        var setLoadingSpy = sinon.spy(myEl, '_setLoadingViewVariables');
+        var callWatchSpy = sinon.spy(myEl, '_callWatchEndpoints');
+
+        myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
+        myEl.classicReferenceId = "REFERENCE_ID";
+        myEl.watcherCisId = "CIS_ID";
+        myEl.toggleWatch({preventDefault: function(){}});
+
+        expect(setLoadingSpy).calledTwice;
+        expect(callWatchSpy).calledOnce;
+      });
+
+
+      test('Element is Accessible', function(done) {
+        myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
+        myEl.classicReferenceId = "REFERENCE_ID";
+        myEl.watcherCisId = null;
+        // We first must wait for the label strings to be loaded so that the elements are accessible
+        flush(function () {
+          a11ySuite('fs-watch-fixture');
+          done();
+        });
+      });
+    });
+
+  </script>
+
+  </body>
+</html>
+
