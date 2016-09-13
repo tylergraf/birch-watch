@@ -13,23 +13,22 @@
   </head>
   <body>
 
-  <test-fixture id="fs-watch-fixture">
+  <test-fixture id="birch-watch-fixture">
     <template>
       <birch-watch></birch-watch>
     </template>
   </test-fixture>
 
   <script>
-    suite('<fs-watch>', function() {
+    suite('<birch-watch>', function() {
 
       var myEl;
 
       setup(function() {
-        myEl = fixture('fs-watch-fixture');
+        myEl = fixture('birch-watch-fixture');
       });
 
       test('Label, status, title should get set to unavailable if we do not have all required properties', function (done) {
-        debugger;
         flush(function () {
           myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
           myEl.classicReferenceId = "REFERENCE_ID";
@@ -99,7 +98,7 @@
         myEl.watcherCisId = null;
         // We first must wait for the label strings to be loaded so that the elements are accessible
         flush(function () {
-          a11ySuite('fs-watch-fixture');
+          a11ySuite('birch-watch-fixture');
           done();
         });
       });
