@@ -63,34 +63,47 @@
 
       });
 
-      test('getWatchStatus', function(done) {
-        myEl._fetchUrl = function(watchStatusUrl) {
-          expect(watchStatusUrl).to.contain(myEl.pid);
-          expect(watchStatusUrl).to.contain(myEl.classicReferenceId);
-          expect(watchStatusUrl).to.contain(myEl.watcherCisId);
-          done();
-          return Promise.resolve();
-        };
-
+      test('getWatchStatus', function() {
+        var fetchSpy = sinon.spy(window, 'fetch');
         myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = "CIS_ID";
+        expect(fetchSpy).calledOnce;
+        assert.equal("/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID", fetchSpy.args[0][0]);
+        assert.equal("HEAD", fetchSpy.args[0][1].method);
+        assert.equal("same-origin", fetchSpy.args[0][1].credentials);
+
       });
 
       test('toggleWatch', function() {
         myEl._fetchUrl = function() {return Promise.resolve({status: 200})};
-        var setLoadingSpy = sinon.spy(myEl, '_setLoadingViewVariables');
-        var callWatchSpy = sinon.spy(myEl, '_callWatchEndpoints');
+        var setLoadingSpy = sinon.spy(myEl, '_setToLoading');
+        var callWatchSpy = sinon.spy(myEl, '_watch');
 
         myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = "CIS_ID";
+        myEl._watching = false;
         myEl.toggleWatch({preventDefault: function(){}});
 
         expect(setLoadingSpy).calledTwice;
         expect(callWatchSpy).calledOnce;
       });
 
+      test('toggleUnwatch', function() {
+        myEl.fetch = function() {return Promise.resolve({status: 200})};
+        var setLoadingSpy = sinon.spy(myEl, '_setToLoading');
+        var callWatchSpy = sinon.spy(myEl, '_unwatch');
+
+        myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
+        myEl.classicReferenceId = "REFERENCE_ID";
+        myEl.watcherCisId = "CIS_ID";
+        myEl._watching = true;
+        myEl.toggleWatch({preventDefault: function(){}});
+
+        expect(setLoadingSpy).calledTwice;
+        expect(callWatchSpy).calledOnce;
+      });
 
       test('Element is Accessible', function(done) {
         myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
