@@ -7,10 +7,8 @@ Display and or Update a FamilySearch Person&#39;s Watch status
 -->
 
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../wc-i18n/wc-i18n-src.html">
 <link rel="import" href="../wc-i18n/wc-i18n.html">
 <link rel="import" href="../oak-i18n-behavior/oak-i18n-behavior.html">
-<link rel="import" href="../wc-i18n/wc-i18n-behavior.html">
 
 
 <dom-module id="birch-watch">
@@ -83,16 +81,9 @@ Display and or Update a FamilySearch Person&#39;s Watch status
         vertical-align: middle;
       }
     </style>
-    <wc-i18n-src locale-dir="[[localeDir()]]" locale="en" domain="birch-watch"></wc-i18n-src>
-    <wc-i18n provider key="birch-watch.UNWATCH_LABEL" value="{{_i18n.unWatchLabel}}"></wc-i18n>
-    <wc-i18n provider key="birch-watch.WATCH_LABEL" value="{{_i18n.watchLabel}}"></wc-i18n>
-    <wc-i18n provider key="birch-watch.UNWATCH_TITLE" value="{{_i18n.unWatchTitle}}"></wc-i18n>
-    <wc-i18n provider key="birch-watch.WATCH_TITLE" value="{{_i18n.watchTitle}}"></wc-i18n>
-    <wc-i18n provider key="birch-watch.UNAVAILABLE_TITLE" value="{{_i18n.unavailableTitle}}"></wc-i18n>
-    <wc-i18n provider key="birch-watch.LOADING_LABEL" value="{{_i18n.loadingLabel}}"></wc-i18n>
 
     <div class="fsWatch">
-      <button on-tap="toggleWatch" class$="watch [[_watchStatus]]" title$="[[_watchTitle]]" role="button" aria-label$=[[_watchLabel]]>[[_watchLabel]]</button>
+      <button on-tap="toggleWatch" class$="watch [[_watchStatus.btnClass]]" title$="[[_watchLabel(_watchStatus, i18n)]]" role="button" aria-label$="[[_watchLabel(_watchStatus, i18n)]]">[[_watchLabel(_watchStatus, i18n)]]</button>
     </div>
   </template>
 
@@ -102,16 +93,12 @@ Display and or Update a FamilySearch Person&#39;s Watch status
       is: 'birch-watch',
 
       behaviors: [
-        WCI18nBehavior,
+        WCI18n(),
         OakI18nBehavior
       ],
 
       properties: {
 
-        _i18n: {
-          type: Object,
-          value: function() { return {}; }
-        },
         /** PID for the person being watched */
         pid: String,
 
@@ -121,38 +108,23 @@ Display and or Update a FamilySearch Person&#39;s Watch status
         /** ID for the reference we are on */
         classicReferenceId: String,
 
-        /** Label for the current watch status */
-        _watchLabel: {
-          type: String,
-          value:""
-        },
-
-        /** Class for the current watch status */
-        _watchStatus: {
-          type:String,
-          value: 'fs-icon-before-watch-unavailable'
-        },
-
-        /** Hover text for the current watch status */
-        _watchTitle: {
-          type: String,
-          value: ""
-        }
-
       },
 
+      _watchStatus: { btnClass: 'fs-icon-before-watch-off', btnLabelKey:'UNAVAILABLE'},
+
       /** the different classes that _watchStatus can equal */
-      _classes: {
-        watching: 'fs-icon-before-watch-on',
-        notWatching: 'fs-icon-before-watch-off',
-        unavailable: 'fs-icon-before-watch-unavailable'
+      _status: {
+        loading: { btnClass: 'loading', btnLabelKey: 'LOADING'},
+        watching: { btnClass: 'fs-icon-before-watch-on', btnLabelKey:'UNWATCH'},
+        notWatching: { btnClass: 'fs-icon-before-watch-off', btnLabelKey:'WATCH'},
+        unavailable: { btnClass: 'fs-icon-before-watch-off', btnLabelKey:'UNAVAILABLE'}
       },
 
       /** Whether the Person is being watched */
       _watching: undefined,
 
       observers: [
-        'getWatchStatus(pid, classicReferenceId, watcherCisId, _i18n.*)'
+        'getWatchStatus(pid, classicReferenceId, watcherCisId)'
       ],
 
       /**
@@ -161,11 +133,8 @@ Display and or Update a FamilySearch Person&#39;s Watch status
        * @param {String} pid The PID of the person to watch
        * @param {String} classicReferenceId The id of the current reference (int, beta, prod, etc.)
        * @param {String} watcherCisId The CIS ID of the person who is watching
-       * @param _i18n {Object} translated strings from locales folder
        */
-      getWatchStatus: function(pid, classicReferenceId, watcherCisId, _i18n) {
-        if (this._translationsLoaded())
-        {
+      getWatchStatus: function(pid, classicReferenceId, watcherCisId) {
           if (pid && classicReferenceId && watcherCisId) {
             var resourceId = pid + classicReferenceId;
             var watchStatusUrl = '/watch/watches' + '?resourceId=' + resourceId + '&watcher=' + watcherCisId;
@@ -174,9 +143,8 @@ Display and or Update a FamilySearch Person&#39;s Watch status
               credentials: 'same-origin'
             };
 
-            this._setToLoading();
-            this._watchLabel = this._i18n.loadingLabel;
-            this._watchTitle = this._i18n.loadingLabel;
+            this._watchStatus += this._status.loading;
+
             fetch(watchStatusUrl, watchStatusConfig)
                 .then(this._verifyWatchRead.bind(this))
                 .then(this._setToWatchOrUnwatch.bind(this))
@@ -184,7 +152,6 @@ Display and or Update a FamilySearch Person&#39;s Watch status
           } else {
             this._setToUnavailable();
           }
-        }
       },
 
       /**
@@ -195,13 +162,13 @@ Display and or Update a FamilySearch Person&#39;s Watch status
       toggleWatch: function(e) {
         e.preventDefault();
         if(this.pid && this.classicReferenceId && this.watcherCisId && (this._watching === true || this._watching === false)){
-          this._setToLoading();
+          this._watchStatus = this._status.loading;
           if (this._watching === true) {
-            this._unwatch(this._pid, this._classicReferenceId, this.watcherCisId)
+            this._unwatch(this.pid, this.classicReferenceId, this.watcherCisId)
                 .then(this._setToUnwatch.bind(this))
                 .catch(this._setToUnavailable.bind(this));
           } else {
-            this._watch(this._pid, this._classicReferenceId, this.watcherCisId)
+            this._watch(this.pid, this.classicReferenceId, this.watcherCisId)
                 .then(this._setToWatch.bind(this))
                 .catch(this._setToUnavailable.bind(this));
           }
@@ -209,34 +176,21 @@ Display and or Update a FamilySearch Person&#39;s Watch status
         }
       },
 
-      _setToLoading: function() {
-        this._watchStatus += ' loading';
-      },
-
-      _translationsLoaded: function () {
-        return !!(this._i18n && this._i18n.loadingLabel)
-      },
-
       /**
        * Sets the view variables based on if we are watching
        */
       _setToUnavailable: function () {
-        this._watchLabel = this._i18n.watchLabel;
-        this._watchTitle = this._i18n.unavailableTitle;
+        this._watchStatus = this._status.unavailable;
       },
 
       _setToWatch: function () {
         this._watching = true;
-        this._watchLabel = this._i18n.unWatchLabel;
-        this._watchStatus = this._classes.watching;
-        this._watchTitle = this._i18n.unWatchTitle;
+        this._watchStatus = this._status.watching;
       },
 
       _setToUnwatch:function () {
         this._watching = false;
-        this._watchLabel = this._i18n.watchLabel;
-        this._watchStatus = this._classes.notWatching;
-        this._watchTitle = this._i18n.watchTitle;
+        this._watchStatus = this._status.notWatching;
       },
 
       _setToWatchOrUnwatch: function (watching) {
@@ -269,7 +223,11 @@ Display and or Update a FamilySearch Person&#39;s Watch status
           }),
           credentials: 'same-origin'
         };
-        return fetch(url, config).then(this._verifyWatchCreated);
+        return fetch(url, config).then(this._verifyWatchCreated).catch(this._setToUnavailable.bind(this));
+      },
+
+      _watchLabel: function (_watchStatus, i18n) {
+        return (_watchStatus && _watchStatus.btnLabelKey ? this.i18n(_watchStatus.btnLabelKey) : "");
       },
 
       /**
@@ -288,7 +246,7 @@ Display and or Update a FamilySearch Person&#39;s Watch status
           method: 'DELETE',
           credentials: 'same-origin'
         };
-        return fetch(url, config).then(this._verifyWatchDeleted);
+        return fetch(url, config).then(this._verifyWatchDeleted.bind(this)).catch(this._setToUnavailable.bind(this));
       },
 
       /**
@@ -303,6 +261,8 @@ Display and or Update a FamilySearch Person&#39;s Watch status
         } else if (response.status === 204) {
           // Not watching: 204 (also returned when requested for a living individual, or a non-existant ID)
           return false;
+        } else {
+          throw Error("Bad Watch Read Response:" + response.status + " received !");
         }
       },
 
@@ -318,6 +278,8 @@ Display and or Update a FamilySearch Person&#39;s Watch status
         } else if (response.status === 204) {
           // Watch did not exist (or it was already deleted)
           return false;
+        } else {
+          throw Error("Bad Watch Delete Response:" + response.status + " received !");
         }
       },
 
@@ -330,6 +292,8 @@ Display and or Update a FamilySearch Person&#39;s Watch status
         if (res.status === 201) {
           // Watch created: 201 (will return 201 even if watch already exists)
           return true;
+        } else {
+          throw Error("Bad Watch Created Response:" + response.status + " received !");
         }
       }
 

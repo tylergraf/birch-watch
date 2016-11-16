@@ -14,11 +14,16 @@
   },
   "devDependencies": {
     "fs-styles": "jshcrowthe/fs-styles#master",
-    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
-    "wc-i18n": "jshcrowthe/wc-i18n",
+    "iron-component-page": "PolymerElements/iron-component-page#^1.1.7",
+    "wc-i18n": "jshcrowthe/wc-i18n#^v2.1.0",
     "oak-i18n-behavior": "FamilySearchElements/oak-i18n-behavior",
     "web-component-tester": "^4.0.0",
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0",
+    "fetch-mock": "https://unpkg.com/fetch-mock@5.5.0/es5/client-browserified.js"
+  },
+  "resolutions": {
+    "fs-styles": "master",
+    "promise-polyfill": "^6.0.2"
   }
 }

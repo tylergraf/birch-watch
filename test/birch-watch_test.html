@@ -1,70 +1,81 @@
 <!doctype html>
 
 <html>
+
   <head>
     <title>birch-watch test</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
-    <script src="../../fetch/fetch.js"></script>
-
     <link rel="import" href="../birch-watch.html">
+
+    <script src="../../fetch/fetch.js"></script>
+    <script src="../../fetch-mock/index.js"></script>
+
   </head>
+
   <body>
 
   <test-fixture id="birch-watch-fixture">
+
     <template>
+
       <birch-watch></birch-watch>
+
     </template>
+
   </test-fixture>
 
   <script>
     suite('<birch-watch>', function() {
 
-      var myEl;
+      function verifyStatus(s1, s2) {
+        assert.equal(s1.btnLabelKey, s2.btnLabelKey);
+        assert.equal(s1.btnClass, s2.btnClass);
+      }
 
+      var myEl;
       setup(function() {
         myEl = fixture('birch-watch-fixture');
       });
+
+      test('birch-watch is ok', function () {
+        expect(myEl).to.be.ok;
+      });
+
 
       test('Label, status, title should get set to unavailable if we do not have all required properties', function (done) {
         flush(function () {
           myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
           myEl.classicReferenceId = "REFERENCE_ID";
           myEl.watcherCisId = null;
+          verifyStatus(myEl._watchStatus, myEl._status.unavailable);
 
-          flush(function () {
-            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
-            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
-            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
+          myEl.pid = "";
+          myEl.watcherCisId = "WATCHER";
+          myEl.classicReferenceId = "REFERENCE";
+          verifyStatus(myEl._watchStatus, myEl._status.unavailable);
 
-            myEl.pid = "";
-            myEl.watcherCisId = "WATCHER";
-            myEl.classicReferenceId = "REFERENCE";
-            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
-            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
-            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
+          myEl.watcherCisId = "";
+          myEl.pid = "PID";
+          verifyStatus(myEl._watchStatus, myEl._status.unavailable);
 
-            myEl.watcherCisId = "";
-            myEl.pid = "PID";
-            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
-            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
-            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
 
-            myEl.classicReferenceId = "";
-            myEl.watcherCisId = "WATCHER";
-            assert.equal(myEl._watchLabel, myEl._i18n.watchLabel);
-            assert.equal(myEl._watchStatus, myEl._classes.unavailable);
-            assert.equal(myEl._watchTitle, myEl._i18n.unavailableTitle);
-            done();
-          });
+          myEl.classicReferenceId = "";
+          myEl.watcherCisId = "WATCHER";
+          verifyStatus(myEl._watchStatus, myEl._status.unavailable);
+
+          done();
         });
 
       });
 
-      test('getWatchStatus', function() {
+      test('getWatchStatus', function(done) {
+        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'HEAD'});
         var fetchSpy = sinon.spy(window, 'fetch');
+
         myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = "CIS_ID";
@@ -72,47 +83,81 @@
         assert.equal("/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID", fetchSpy.args[0][0]);
         assert.equal("HEAD", fetchSpy.args[0][1].method);
         assert.equal("same-origin", fetchSpy.args[0][1].credentials);
+        flush(function() {
+          verifyStatus(myEl._watchStatus, myEl._status.watching);
+          fetchMock.restore();
+          done();
+        });
+
 
       });
 
-      test('toggleWatch', function() {
-        myEl._fetchUrl = function() {return Promise.resolve({status: 200})};
-        var setLoadingSpy = sinon.spy(myEl, '_setToLoading');
-        var callWatchSpy = sinon.spy(myEl, '_watch');
+      test('toggleWatch', function(done) {
+        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'HEAD'});
+        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'DELETE'});
 
-        myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
-        myEl.classicReferenceId = "REFERENCE_ID";
-        myEl.watcherCisId = "CIS_ID";
-        myEl._watching = false;
-        myEl.toggleWatch({preventDefault: function(){}});
-
-        expect(setLoadingSpy).calledTwice;
-        expect(callWatchSpy).calledOnce;
-      });
-
-      test('toggleUnwatch', function() {
-        myEl.fetch = function() {return Promise.resolve({status: 200})};
-        var setLoadingSpy = sinon.spy(myEl, '_setToLoading');
         var callWatchSpy = sinon.spy(myEl, '_unwatch');
 
         myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = "CIS_ID";
-        myEl._watching = true;
-        myEl.toggleWatch({preventDefault: function(){}});
 
-        expect(setLoadingSpy).calledTwice;
-        expect(callWatchSpy).calledOnce;
+        flush(function () {
+          verifyStatus(myEl._watchStatus, myEl._status.watching);
+          myEl.toggleWatch({preventDefault: function(){}});
+
+          expect(callWatchSpy).calledOnce;
+
+          flush(function () {
+            verifyStatus(myEl._watchStatus, myEl._status.notWatching);
+            fetchMock.restore();
+            done();
+          });
+
+        });
+
+
+      });
+
+      test('toggleUnwatch', function(done) {
+        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'HEAD'});
+        fetchMock.mock({matcher:'/watch/watch', response:201, method:'POST'});
+
+        var callWatchSpy = sinon.spy(myEl, '_watch');
+
+        myEl.pid = "TEST-PID";
+        myEl.classicReferenceId = "REFERENCE_ID";
+        myEl.watcherCisId = "CIS_ID";
+
+        flush(function () {
+          verifyStatus(myEl._watchStatus, myEl._status.watching);
+          myEl._watching = false;
+          myEl._watchStatus = myEl._status.notWatching;
+          myEl.toggleWatch({
+            preventDefault: function () {
+            }
+          });
+
+          expect(callWatchSpy).calledOnce;
+
+          flush(function () {
+            expect(myEl._watching).to.be.true;
+            fetchMock.restore();
+            done();
+          });
+        });
+
+
       });
 
       test('Element is Accessible', function(done) {
-        myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
+        myEl.pid = "TEST-PID";
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = null;
-        // We first must wait for the label strings to be loaded so that the elements are accessible
+
         flush(function () {
-          a11ySuite('birch-watch-fixture');
-          done();
+            a11ySuite('birch-watch');
+            done();
         });
       });
     });
