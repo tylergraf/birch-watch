@@ -51,20 +51,24 @@
           myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
           myEl.classicReferenceId = "REFERENCE_ID";
           myEl.watcherCisId = null;
+          myEl.sessionId = null;
           verifyStatus(myEl._watchStatus, myEl._status.unavailable);
 
           myEl.pid = "";
           myEl.watcherCisId = "WATCHER";
           myEl.classicReferenceId = "REFERENCE";
+          myEl.sessionId = null;
           verifyStatus(myEl._watchStatus, myEl._status.unavailable);
 
           myEl.watcherCisId = "";
           myEl.pid = "PID";
+          myEl.sessionId = null;
           verifyStatus(myEl._watchStatus, myEl._status.unavailable);
 
 
           myEl.classicReferenceId = "";
           myEl.watcherCisId = "WATCHER";
+          myEl.sessionId = null;
           verifyStatus(myEl._watchStatus, myEl._status.unavailable);
 
           done();
@@ -73,14 +77,15 @@
       });
 
       test('getWatchStatus', function(done) {
-        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'HEAD'});
+        fetchMock.mock({matcher:'https://integration.familysearch.org/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID&sessionId=SESSION_ID', response:200, method:'HEAD'});
         var fetchSpy = sinon.spy(window, 'fetch');
 
         myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = "CIS_ID";
+        myEl.sessionId = "SESSION_ID";
         expect(fetchSpy).calledOnce;
-        assert.equal("/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID", fetchSpy.args[0][0]);
+        assert.equal("https://integration.familysearch.org/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID&sessionId=SESSION_ID", fetchSpy.args[0][0]);
         assert.equal("HEAD", fetchSpy.args[0][1].method);
         assert.equal("same-origin", fetchSpy.args[0][1].credentials);
         flush(function() {
@@ -93,14 +98,15 @@
       });
 
       test('toggleWatch', function(done) {
-        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'HEAD'});
-        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'DELETE'});
+        fetchMock.mock({matcher:'https://integration.familysearch.org/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID&sessionId=SESSION_ID', response:200, method:'HEAD'});
+        fetchMock.mock({matcher:'https://integration.familysearch.org/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID&sessionId=SESSION_ID', response:200, method:'DELETE'});
 
         var callWatchSpy = sinon.spy(myEl, '_unwatch');
 
         myEl.pid = "TEST-PID"; //This fires the getWatchStatus function.
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = "CIS_ID";
+        myEl.sessionId = "SESSION_ID";
 
         flush(function () {
           verifyStatus(myEl._watchStatus, myEl._status.watching);
@@ -120,14 +126,15 @@
       });
 
       test('toggleUnwatch', function(done) {
-        fetchMock.mock({matcher:'/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID', response:200, method:'HEAD'});
-        fetchMock.mock({matcher:'/watch/watch', response:201, method:'POST'});
+        fetchMock.mock({matcher:'https://integration.familysearch.org/watch/watches?resourceId=TEST-PIDREFERENCE_ID&watcher=CIS_ID&sessionId=SESSION_ID', response:200, method:'HEAD'});
+        fetchMock.mock({matcher:'https://integration.familysearch.org/watch/watch?sessionId=SESSION_ID', response:201, method:'POST'});
 
         var callWatchSpy = sinon.spy(myEl, '_watch');
 
         myEl.pid = "TEST-PID";
         myEl.classicReferenceId = "REFERENCE_ID";
         myEl.watcherCisId = "CIS_ID";
+        myEl.sessionId = "SESSION_ID";
 
         flush(function () {
           verifyStatus(myEl._watchStatus, myEl._status.watching);

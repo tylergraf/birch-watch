@@ -9,6 +9,7 @@ Display and or Update a FamilySearch Person&#39;s Watch status
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../wc-i18n/wc-i18n.html">
 <link rel="import" href="../oak-i18n-behavior/oak-i18n-behavior.html">
+<link rel="import" href="../oak-ajax-behavior/oak-ajax-behavior.html">
 
 
 <dom-module id="birch-watch">
@@ -94,7 +95,8 @@ Display and or Update a FamilySearch Person&#39;s Watch status
 
       behaviors: [
         WCI18n(),
-        OakI18nBehavior
+        OakI18nBehavior,
+        OakAJAXBehavior
       ],
 
       properties: {
@@ -124,7 +126,7 @@ Display and or Update a FamilySearch Person&#39;s Watch status
       _watching: undefined,
 
       observers: [
-        'getWatchStatus(pid, classicReferenceId, watcherCisId)'
+        'getWatchStatus(pid, classicReferenceId, watcherCisId, sessionId)'
       ],
 
       /**
@@ -134,10 +136,10 @@ Display and or Update a FamilySearch Person&#39;s Watch status
        * @param {String} classicReferenceId The id of the current reference (int, beta, prod, etc.)
        * @param {String} watcherCisId The CIS ID of the person who is watching
        */
-      getWatchStatus: function(pid, classicReferenceId, watcherCisId) {
-          if (pid && classicReferenceId && watcherCisId) {
+      getWatchStatus: function(pid, classicReferenceId, watcherCisId, sessionId) {
+          if (pid && classicReferenceId && watcherCisId && sessionId) {
             var resourceId = pid + classicReferenceId;
-            var watchStatusUrl = '/watch/watches' + '?resourceId=' + resourceId + '&watcher=' + watcherCisId;
+            var watchStatusUrl = this.ajaxBase+'/watch/watches' + '?resourceId=' + resourceId + '&watcher=' + watcherCisId+ '&sessionId=' + sessionId;
             var watchStatusConfig = {
               method: 'HEAD',
               credentials: 'same-origin'
@@ -211,7 +213,7 @@ Display and or Update a FamilySearch Person&#39;s Watch status
        */
       _watch: function (pid, classicReferenceId) {
         var resourceId = pid + classicReferenceId;
-        var url = "/watch/watch";
+        var url = this.ajaxBase+"/watch/watch?sessionId="+this.sessionId;
         var config = {
           method: 'POST',
           headers: new Headers({'content-type': 'application/json'}),
@@ -238,9 +240,9 @@ Display and or Update a FamilySearch Person&#39;s Watch status
        * @param {String} watcherCisId The CIS ID of the person who is watching
        */
       _unwatch: function (pid, classicReferenceId, watcherCisId) {
-        var WATCH_STATUS_ENDPOINT = "/watch/watches";
+        var WATCH_STATUS_ENDPOINT = this.ajaxBase+"/watch/watches";
         var resourceId = pid + classicReferenceId;
-        var queryString = '?resourceId=' + resourceId + '&watcher=' + watcherCisId;
+        var queryString = '?resourceId=' + resourceId + '&watcher=' + watcherCisId + '&sessionId=' + this.sessionId;
         var url = WATCH_STATUS_ENDPOINT + queryString;
         var config = {
           method: 'DELETE',
