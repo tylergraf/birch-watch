@@ -4,6 +4,7 @@
   "description": "Display Watch Status of a FamilySearch Person",
   "main": "birch-watch.html",
   "license": "MIT",
+  "version": "0.0.1",
   "ignore": [
     "/.*",
     "/test/"
