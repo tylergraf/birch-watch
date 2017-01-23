@@ -126,7 +126,7 @@ Display and or Update a FamilySearch Person&#39;s Watch status
       _watching: undefined,
 
       observers: [
-        'getWatchStatus(pid, classicReferenceId, watcherCisId, sessionId)'
+        'getWatchStatus(pid, classicReferenceId, watcherCisId, ajaxBase, authHeaders)'
       ],
 
       /**
@@ -136,10 +136,13 @@ Display and or Update a FamilySearch Person&#39;s Watch status
        * @param {String} classicReferenceId The id of the current reference (int, beta, prod, etc.)
        * @param {String} watcherCisId The CIS ID of the person who is watching
        */
-      getWatchStatus: function(pid, classicReferenceId, watcherCisId, sessionId) {
-          if (pid && classicReferenceId && watcherCisId && sessionId) {
+      getWatchStatus: function(pid, classicReferenceId, watcherCisId, ajaxBase, authHeaders) {
+          if (pid && classicReferenceId && watcherCisId && this.sessionId) {
+            var _sessionId = this.sessionId;
+            var _authHeaders = this.authHeaders;
+            var _ajaxBase = this.ajaxBase;
             var resourceId = pid + classicReferenceId;
-            var watchStatusUrl = this.ajaxBase+'/watch/watches' + '?resourceId=' + resourceId + '&watcher=' + watcherCisId+ '&sessionId=' + sessionId;
+            var watchStatusUrl = _ajaxBase+'/watch/watches' + '?resourceId=' + resourceId + '&watcher=' + watcherCisId+ '&sessionId=' + _sessionId;
             var watchStatusConfig = {
               method: 'HEAD',
               credentials: 'same-origin'
